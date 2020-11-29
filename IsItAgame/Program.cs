@@ -13,6 +13,22 @@ namespace IsItAgame
 		static readonly int Height = Console.WindowHeight;
 		static readonly int Width = Console.WindowWidth;
 		static readonly Dictionary<int, string> CompassHeading = new Dictionary<int, string>();
+		static readonly ConsoleColor OriginalBackgroundColor = Console.BackgroundColor;
+		static readonly ConsoleColor OriginalForegroundColor = Console.ForegroundColor;
+		static readonly int StartingCompassLeft = Width / 2;
+		static readonly int StartingCompassTop = 2;
+		static readonly int TuringTextLeft = StartingCompassLeft + 2;
+		static readonly int TurningTestTop = 1;
+		static readonly int StartingTraficLightLeft = Width / 4;
+		static readonly int StartingTraficLightTop = 1;
+
+		enum TrafficLightState
+		{ 
+			GREEN = 0,
+			YELLOW = 1, 
+			RED = 2, 
+			LEFTTURNGREEN = 3
+		}
 
 		/// <summary>
 		/// The strings below make up the characters that are used to show the compass heading
@@ -40,10 +56,10 @@ namespace IsItAgame
 		"      W      " + "\r\n";
 		static readonly string SouthEast = "" +
 		"             " + "\r\n" +
-		" E       S   " + "\r\n" +
+		"  E       S  " + "\r\n" +
 		"             " + "\r\n" +
 		"             " + "\r\n" +
-		" N       W   " + "\r\n" +
+		"  N       W  " + "\r\n" +
 		"             " + "\r\n";
 		static readonly string South = "" +
 		"      S      " + "\r\n" +
@@ -53,10 +69,10 @@ namespace IsItAgame
 		"      N      " + "\r\n";
 		static readonly string SouthWest = "" +
 		"             " + "\r\n" +
-		" S       W   " + "\r\n" +
+		"  S       W  " + "\r\n" +
 		"             " + "\r\n" +
 		"             " + "\r\n" +
-		" E       N   " + "\r\n" +
+		"  E       N  " + "\r\n" +
 		"             " + "\r\n";
 		static readonly string West = "" +
 		"      W      " + "\r\n" +
@@ -66,12 +82,115 @@ namespace IsItAgame
 		"      E      " + "\r\n";
 		static readonly string NorthWest = "" +
 		"             " + "\r\n" +
-		" W       N  " + "\r\n" +
+		"  W       N  " + "\r\n" +
 		"             " + "\r\n" +
 		"             " + "\r\n" +
-		" S       E   " + "\r\n" +
+		"  S       E  " + "\r\n" +
 		"             " + "\r\n";
 		#endregion
+
+
+		static readonly string TrafficLightOutline =
+			" _____________" + "\r\n" +
+			"|             |" + "\r\n" +
+			"|             |" + "\r\n" +
+			"|             |" + "\r\n" +
+			"|             |" + "\r\n" +
+			"|             |" + "\r\n" +
+			"|             |" + "\r\n" +
+			"|             |" + "\r\n" +
+			"|             |" + "\r\n" +
+			"|             |" + "\r\n" +
+			"|             |" + "\r\n" +
+			"|             |" + "\r\n" +
+			"|             |" + "\r\n" +
+			"|_____________|";
+
+
+		static readonly string ActiveLight =
+		"        |" + "\r\n" +
+		"        |" + "\r\n" +
+		"        |" + "\r\n";
+
+
+		static readonly string NonActiveLight =
+		" _______ " + "\r\n" +
+		"|       |" + "\r\n" +
+		"|_______|" + "\r\n" + 
+		"         " + "\r\n";
+
+		static readonly string LeftGreenLight =
+		" _______    " + "\r\n" +
+		"| /____ |" + "\r\n" +
+	   @"|_\_____|" + "\r\n";
+
+		
+		static void RenderTraficLight(TrafficLightState tls)
+		{
+			Console.SetCursorPosition(StartingTraficLightLeft + 3, StartingTraficLightTop + 2);
+
+
+			int x = Console.CursorLeft;
+			int y = Console.CursorTop;
+			for (int bulb = 1; bulb <= 3; bulb++)
+			{
+				
+				string lightString = "";
+				if(bulb == 1 && tls == TrafficLightState.RED)
+				{
+					Console.ForegroundColor = ConsoleColor.Red;
+					Console.BackgroundColor = ConsoleColor.Red;
+					lightString = ActiveLight;
+				}
+				if (bulb == 1 && tls != TrafficLightState.RED)
+				{
+					lightString = NonActiveLight;
+				}
+				if(bulb == 2 && tls == TrafficLightState.YELLOW)
+				{
+					Console.BackgroundColor = ConsoleColor.Yellow;
+					lightString = ActiveLight;
+				}
+				else if(bulb == 2 && tls != TrafficLightState.YELLOW)
+				{
+					lightString = NonActiveLight;
+				}
+				else if (bulb == 3 && tls == TrafficLightState.LEFTTURNGREEN)
+				{
+					Console.ForegroundColor = ConsoleColor.Green;
+					lightString = LeftGreenLight;
+				}
+				else if (bulb == 3 && tls == TrafficLightState.GREEN)
+				{
+					Console.BackgroundColor = ConsoleColor.Green;
+					Console.ForegroundColor = ConsoleColor.Green;
+					lightString = ActiveLight;
+				}
+				else if (bulb == 3 && tls != TrafficLightState.LEFTTURNGREEN && tls != TrafficLightState.GREEN)
+				{
+					lightString = NonActiveLight;
+				}
+
+				foreach (char c in lightString)
+				{
+					if (c is '\n')
+					{
+						Console.SetCursorPosition(x, ++y);
+					}
+					else if (Console.CursorLeft < Width - 1 && (!(c is ' ') || true))
+					{
+						Console.Write(c);
+					}
+					else if (Console.CursorLeft < Width - 1 && Console.CursorTop < Height - 1)
+					{
+						Console.SetCursorPosition(Console.CursorLeft + 1, Console.CursorTop);
+					}
+				}
+				Console.BackgroundColor = OriginalBackgroundColor;
+				Console.ForegroundColor = OriginalForegroundColor;
+			}
+		}
+
 
 		/// <summary>
 		/// This is used to hold the current index of the CompassHeading dictionary which 
@@ -88,7 +207,7 @@ namespace IsItAgame
 		/// <param name="displayTurning"></param>
 		static void RenderCompass(string str)
 		{
-			Console.SetCursorPosition((Width / 4), 2);
+			Console.SetCursorPosition(StartingCompassLeft, StartingCompassTop);
 			int x = Console.CursorLeft;
 			int y = Console.CursorTop;
 			foreach (char c in @str)
@@ -97,7 +216,7 @@ namespace IsItAgame
 				{
 					Console.SetCursorPosition(x, ++y);
 				}
-				else if (Console.CursorLeft < Width - 1 && (!(c is ' ') || true))
+				else if (Console.CursorLeft < Width - 1 /*&& (!(c is ' ') || true)*/)
 				{
 					if (c.Equals('N'))
 					{
@@ -161,6 +280,9 @@ namespace IsItAgame
 			CompassHeading.Add(7, NorthWest);
 			#endregion
 
+			Console.SetCursorPosition(StartingTraficLightLeft, StartingTraficLightTop);
+			Render(TrafficLightOutline, true);
+			RenderTraficLight(TrafficLightState.LEFTTURNGREEN);
 			RenderCompass(CompassHeading[0]);//set compass to North heading to start
 			int turning = 0;
 			bool turnNeedsUpdate = false;
@@ -195,9 +317,14 @@ namespace IsItAgame
 								break;
 							}
 							turning = -1;
-							Console.SetCursorPosition((Width / 4) + 3, 1);
+							Console.SetCursorPosition(TuringTextLeft, TurningTestTop);
+							Console.BackgroundColor = ConsoleColor.Cyan;
+							Console.ForegroundColor = ConsoleColor.Black;
 							Console.Write("Turning Left");
 							StopwatchCompass.Restart();
+							Console.BackgroundColor = OriginalBackgroundColor;
+							Console.ForegroundColor = OriginalForegroundColor;
+
 							break;
 						case ConsoleKey.RightArrow:
 							if (turning != 0)//already turning 
@@ -205,9 +332,13 @@ namespace IsItAgame
 								break;
 							}
 							turning = 1;
-							Console.SetCursorPosition((Width / 4) + 3, 1);
+							Console.SetCursorPosition(TuringTextLeft, TurningTestTop);
+							Console.BackgroundColor = ConsoleColor.Cyan;
+							Console.ForegroundColor = ConsoleColor.Black;
 							Console.Write("Turning Right");
 							StopwatchCompass.Restart();
+							Console.BackgroundColor = OriginalBackgroundColor;
+							Console.ForegroundColor = OriginalForegroundColor;
 							break;
 						case ConsoleKey.DownArrow:
 							//stop if can
@@ -241,7 +372,8 @@ namespace IsItAgame
 					}
 					if(0 == turning && turnNeedsUpdate)
 					{
-						Console.SetCursorPosition((Width / 4) + 3, 1);
+						//clear the turning text
+						Console.SetCursorPosition(TuringTextLeft, TurningTestTop);
 						Console.Write("                    ");
 						turnNeedsUpdate = false;
 					}
