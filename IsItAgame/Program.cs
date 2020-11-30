@@ -15,12 +15,14 @@ namespace IsItAgame
 		static readonly Dictionary<int, string> CompassHeading = new Dictionary<int, string>();
 		static readonly ConsoleColor OriginalBackgroundColor = Console.BackgroundColor;
 		static readonly ConsoleColor OriginalForegroundColor = Console.ForegroundColor;
-		static readonly int StartingCompassLeft = Width / 2;
-		static readonly int StartingCompassTop = 2;
-		static readonly int TuringTextLeft = StartingCompassLeft + 2;
-		static readonly int TurningTestTop = 1;
-		static readonly int StartingTraficLightLeft = Width / 4;
+		static readonly int StartingCompassLeft = (Width / 2) + 5;
+		static readonly int StartingCompassTop = 5;
+		static readonly int TuringTextLeft = StartingCompassLeft + 1;
+		static readonly int StartingTraficLightLeft = 5;
+		static readonly int TurningTestTop = StartingCompassTop-1; 
 		static readonly int StartingTraficLightTop = 1;
+		static readonly int DistanceDisplayStartLeft = Width / 3;
+		static readonly int DistanceDisplayStartTop = 7;
 
 		enum TrafficLightState
 		{ 
@@ -89,8 +91,11 @@ namespace IsItAgame
 		"             " + "\r\n";
 		#endregion
 
-
-		static readonly string TrafficLightOutline =
+		/// <summary>
+		/// The strings below are used to form the traffic light
+		/// </summary>
+		#region traffic light strings
+		static readonly string TrafficLightFrame =
 			" _____________" + "\r\n" +
 			"|             |" + "\r\n" +
 			"|             |" + "\r\n" +
@@ -106,7 +111,6 @@ namespace IsItAgame
 			"|             |" + "\r\n" +
 			"|_____________|";
 
-
 		static readonly string ActiveLight =
 		"        |" + "\r\n" +
 		"        |" + "\r\n" +
@@ -120,21 +124,29 @@ namespace IsItAgame
 		"         " + "\r\n";
 
 		static readonly string LeftGreenLight =
-		" _______    " + "\r\n" +
+		" _______ " + "\r\n" +
 		"| /____ |" + "\r\n" +
 	   @"|_\_____|" + "\r\n";
+		#endregion
 
-		
+		static readonly string DistanceDisplayFrame =
+			" _________" + "\r\n" +
+			"|         |" + "\r\n" +
+			"|         |" + "\r\n" +
+			"|_________|" + "\r\n";
+
+
+		/// <summary>
+		/// draws the traffic light in the console 
+		/// </summary>
+		/// <param name="tls"></param>
 		static void RenderTraficLight(TrafficLightState tls)
 		{
 			Console.SetCursorPosition(StartingTraficLightLeft + 3, StartingTraficLightTop + 2);
-
-
 			int x = Console.CursorLeft;
 			int y = Console.CursorTop;
 			for (int bulb = 1; bulb <= 3; bulb++)
 			{
-				
 				string lightString = "";
 				if(bulb == 1 && tls == TrafficLightState.RED)
 				{
@@ -170,7 +182,6 @@ namespace IsItAgame
 				{
 					lightString = NonActiveLight;
 				}
-
 				foreach (char c in lightString)
 				{
 					if (c is '\n')
@@ -248,8 +259,6 @@ namespace IsItAgame
 					Console.SetCursorPosition(Console.CursorLeft + 1, Console.CursorTop);
 		}
 
-		
-
 		static void RotateCompassForTurn(int step)
 		{
 			if (CompassHeadingIndex + step > 7 ) 
@@ -281,9 +290,13 @@ namespace IsItAgame
 			#endregion
 
 			Console.SetCursorPosition(StartingTraficLightLeft, StartingTraficLightTop);
-			Render(TrafficLightOutline, true);
-			RenderTraficLight(TrafficLightState.LEFTTURNGREEN);
+			Render(TrafficLightFrame, true);
+			RenderTraficLight(TrafficLightState.GREEN);
 			RenderCompass(CompassHeading[0]);//set compass to North heading to start
+
+			Console.SetCursorPosition(DistanceDisplayStartLeft, DistanceDisplayStartTop);
+			Render(DistanceDisplayFrame, true);
+
 			int turning = 0;
 			bool turnNeedsUpdate = false;
 			while (true)
@@ -374,14 +387,14 @@ namespace IsItAgame
 					{
 						//clear the turning text
 						Console.SetCursorPosition(TuringTextLeft, TurningTestTop);
-						Console.Write("                    ");
+						Console.Write("             ");
 						turnNeedsUpdate = false;
 					}
 					StopwatchCompass.Restart();
 					
 				}
 
-					Thread.Sleep(ThreadSleepTimeSpan);
+				Thread.Sleep(ThreadSleepTimeSpan);
 			}
 
 			
